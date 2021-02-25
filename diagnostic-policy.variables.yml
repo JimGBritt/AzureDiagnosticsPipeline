@@ -1,0 +1,29 @@
+variables:
+- name: scriptPath
+  value: $(Build.SourcesDirectory)/scripts
+- name: armTemplatePath
+  value: $(Build.SourcesDirectory)/armTemplates
+- name: policyTemplatePath
+  value: $(Build.SourcesDirectory)/policyTemplates
+- name: initiativeDisplayName
+  value: Azure Diagnostics Policy Initiative for a Log Analytics Workspace
+- name: templateFileName
+  value: $(prefix)-ARMTemplateExport$(suffix)
+- name: exportDir
+  value: $(Agent.TempDirectory)/ARMTemplate
+- name: location
+  value: eastus
+- name: subscriptionId
+  value: __blank__
+- name: isChanged
+  value: false
+- name: contributorRoleDefinitionId
+  value: b24988ac-6180-42a0-ab88-20f7382dd24c
+- name: policy.profileName
+  value: SetByCustomPolicy
+- name: policy.identityType
+  value: SystemAssigned
+- name: logAnalyticsName
+  value: $(prefix)-LA$(suffix)
+- name: notScopeRGs
+  value: '[ "$(prefix)-OnPremRG$(suffix)" ]'

@@ -1,0 +1,9 @@
+variables:
+- name: prefix
+  value: AZ0
+- name: suffix
+  value: -PRE
+- name: azureSubscriptionEndpoint
+  value: jbritt
+- name: location
+  value: eastus
