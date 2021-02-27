@@ -100,7 +100,6 @@ jobs:
           location = '$(location)'
           displayName = '$(initiativeDisplayName)'
           identityType = '$(policy.identityType)'
-          notScopes = @()
           policyDefinitionId = $policySetDefinition.PolicySetDefinitionId
           parameters = @{
             profileName = @{
@@ -117,8 +116,6 @@ jobs:
             }
           }
         }
-
-        '$(notScopeRGs)' | ConvertFrom-Json | % { $templateParameters.notScopes += "/subscriptions/$(subscriptionId)/resourceGroups/$_" }
 
         $policyAssignment = New-AzDeployment -Name 'Assign_Diagnostics_Initiative_$(Build.BuildNumber)' -Location $(location) `
           -TemplateFile '$(armTemplatePath)/Microsoft.Authorization/policyAssignment.json' `
@@ -164,8 +161,8 @@ jobs:
     condition: and(succeeded(), eq(variables.isChanged, true))
     inputs:
       script: |
-        git config --global user.email "contosohotelspipelineg@microsoft.com"
-        git config --global user.name "ContosoHotelsPipeline"
+        git config --global user.email ""
+        git config --global user.name "AzureDiagnosticsPipeline"
         git checkout $(Build.SourceBranchName)
         git add --all
         git commit -m "Update Diagnostics Policy Initiative ARM template"

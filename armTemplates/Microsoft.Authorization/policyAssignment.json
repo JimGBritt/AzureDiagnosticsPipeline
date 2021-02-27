@@ -17,10 +17,6 @@
             "type": "string",
             "defaultValue": "[subscription().id]"
         },
-        "notScopes": {
-            "type": "array",
-            "defaultValue": []
-        },
         "policyDefinitionId": {
             "type": "string"
         },
@@ -45,7 +41,6 @@
 			"properties": {
 				"displayName": "[parameters('displayName')]",
 				"scope": "[parameters('scope')]",
-				"notScopes": "[parameters('notScopes')]",
 				"policyDefinitionId": "[parameters('policyDefinitionId')]",
 				"parameters": "[parameters('parameters')]"
 			}

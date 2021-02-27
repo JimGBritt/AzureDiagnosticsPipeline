@@ -4,6 +4,6 @@ variables:
 - name: suffix
   value: '-INT'
 - name: azureSubscriptionEndpoint
-  value: jbritt
+  value: <SPN Name>
 - name: location
   value: eastus

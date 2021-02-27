@@ -24,6 +24,5 @@ variables:
 - name: policy.identityType
   value: SystemAssigned
 - name: logAnalyticsName
-  value: $(prefix)-LA$(suffix)
-- name: notScopeRGs
-  value: '[ "none" ]'
+  value: LAWorkspaceName
+
