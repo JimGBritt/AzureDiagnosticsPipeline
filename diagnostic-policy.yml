@@ -146,7 +146,7 @@ jobs:
       azureSubscription:  ${{variables.azureSubscriptionEndpoint}}
       ScriptType: InlineScript
       Inline: |
-        $(ScriptPath)/Trigger-PolicyEvaluation.ps1 -ADO -SubscriptionId '$(subscriptionId)'
+        $(ScriptPath)/Trigger-PolicyEvaluation.ps1 -SubscriptionId '$(subscriptionId)'
 
   - task: AzurePowerShell@4
     #enabled: false
@@ -157,7 +157,7 @@ jobs:
       azureSubscription:  ${{variables.azureSubscriptionEndpoint}}
       ScriptType: InlineScript
       Inline: |
-        $(ScriptPath)/Trigger-PolicyInitiativeRemediation.ps1 -ADO -SubscriptionId '$(subscriptionId)' -PolicyAssignmentId '$(policyAssignmentId)' -Force
+        $(ScriptPath)/Trigger-PolicyInitiativeRemediation.ps1 -SubscriptionId '$(subscriptionId)' -PolicyAssignmentId '$(policyAssignmentId)' -Force
 
   - task: CmdLine@2
     displayName: 'Push template to the $(Build.SourceBranchName) branch'
