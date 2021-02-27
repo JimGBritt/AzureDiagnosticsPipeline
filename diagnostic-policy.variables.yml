@@ -26,4 +26,4 @@ variables:
 - name: logAnalyticsName
   value: $(prefix)-LA$(suffix)
 - name: notScopeRGs
-  value: '[ "$(prefix)-OnPremRG$(suffix)" ]'
+  value: '[ "none" ]'
