@@ -93,6 +93,8 @@ jobs:
         $template = Get-Content '$(ExportDir)/$(TemplateFileName).json' | ConvertFrom-Json
         $initiative = $template.resources | ? { $_.properties.displayName -eq '$(InitiativeDisplayName)' }
 
+        Start-Sleep -Seconds 30
+
         $policySetDefinition = Get-AzPolicySetDefinition -Name $initiative.name -SubscriptionId $(subscriptionId)
         $logAnalyticsResource = Get-AzResource -Name $(logAnalyticsName) -ResourceType 'Microsoft.OperationalInsights/workspaces'
 
