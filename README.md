@@ -3,7 +3,7 @@
 ## INTRODUCTION
 Leverage this repository as an example to get started deploying Azure Diagnostics via Custom Azure Policies wrapped in a policy initiative ARM template.  This DevOps pipeline allows you to dynamically build the necessary custom Azure Policies to configure your PaaS resources in Azure that support Azure Diagnostics.  The pipeline can be run on a schedule (example: daily) to ensure that your resources are always configured with the latest Azure Diagnostic configurations and stay compliant.
 
-1. Pipeline automatically pulls down the scripts from https://aka.ms/AzPolicyScripts with an optional parameter to not automatically update once initially downloaded
+1. Pipeline automatically pulls down the scripts from [https://aka.ms/AzPolicyScripts](https://aka.ms/AzPolicyScripts) with an optional parameter to not automatically update once initially downloaded
 
 1. Runs an assessment against your Azure Subscription to determine what ResourceTypes are available that support Azure Diagnostics.
 
@@ -33,12 +33,15 @@ Leverage this repository as an example to get started deploying Azure Diagnostic
 
 ## IMPORTING PIPELINE FROM GITHUB TO AZURE DEVOPS
 
-The pipeline example source file is located here: https://github.com/jimgbritt/AzureDiagnosticsPipeline
+The pipeline example source file is located here: [https://github.com/jimgbritt/AzureDiagnosticsPipeline](https://github.com/jimgbritt/AzureDiagnosticsPipeline)
 
-1. Select the Code dropdown
+1. Select the **Code** dropdown
 1. Copy the URL to the source on GitHub to be used in a later step
 
 1. Create a new project in your Azure DevOps instance (I called mine AzureDiagnostics) and feel free to make this a private repo as it is not necessary to publish this publicly.
+
+    ![image.png](.\images\github-pipeline.png)
+
 1. Provide a description.
 1. Set the configuration appropriate to your needs and select Create.
  
@@ -54,6 +57,7 @@ The pipeline example source file is located here: https://github.com/jimgbritt/A
 ## CONFIGURATION OF PIPELINE
 
 Once things are imported, there are a few configurations that need to be done to ensure this can work within your environment.
+
 ## SERVICE CONNECTION CONFIGURATION (SPN)
 
 You need to create a Service Connection to your Azure Subscription that has rights to connect to your environment, create an ARM template deployment, assign a policy initiative, initiate the policy compliance evaluation and finally policy initiative remediation.
@@ -112,9 +116,9 @@ parameters:
   - PreProd
 ```
 
-### Download of Scripts from GitHub Repo (https://aka.ms/AzPolicyScripts) 
+### Download of Scripts from GitHub Repo [https://aka.ms/AzPolicyScripts](https://aka.ms/AzPolicyScripts) 
 
-Scripts from https://aka.ms/AzPolicyScripts can be automatically kept up to date.  If you want to manage this on your own, set default to false otherwise, we’ll ensure you always have the latest in this pipeline configuration.
+Scripts from [https://aka.ms/AzPolicyScripts](https://aka.ms/AzPolicyScripts) can be automatically kept up to date.  If you want to manage this on your own, set default to false otherwise, we’ll ensure you always have the latest in this pipeline configuration.
 ```
 - name: fromGitHub
   displayName: 'Get scripts from GitHub'
@@ -136,7 +140,7 @@ variables:
 
 ### Create-AzDiagPolicy.PS1 script behavior
 
-If you want to change how the policies are built, according to your target environment, you’ll want to review the script options at https://aka.ms/AzPolicyScripts and customize the below section accordingly (specifically the bolded ones below)
+If you want to change how the policies are built, according to your target environment, you’ll want to review the script options at [https://aka.ms/AzPolicyScripts](https://aka.ms/AzPolicyScripts) and customize the below section accordingly (specifically the bolded ones below)
 ```
         $(ScriptPath)/Create-AzDiagPolicy.ps1 -ExportDir '$(ExportDir)' -ExportAll -ExportLA -AllRegions -ValidateJSON -ExportInitiative `
           -InitiativeDisplayName '$(InitiativeDisplayName)' -TemplateFileName '$(TemplateFileName)' `
@@ -194,7 +198,7 @@ The environment specific variable file contains specific details that allow you 
 * Prefix: leveraged to create a prefix on the ARM template export.
 * Suffix: will be appended to the end of the ARM template export file (not used in this example).
 * AzureSubscriptionEndpoint: This is your Service Connection you created at the beginning to connect to Azure.
-* Location: Update this according to your target region preferred for your ARM demployment.
+* Location: Update this according to your target region preferred for your ARM deployment.
 
 ## SETTING UP RIGHTS
 
@@ -209,7 +213,7 @@ In order for your Service Connection to commit to your Git the necessary files (
  
 ## DEPLOYMENT TESTING
 
-To test your pipeline browse to pipelines, locate your named pipeline (in my case AzureDiagnostics), click the three dots on the right and select Run pipeline. If you have multiple environments, you’ll see options to select between them as well as the option to get scripts from GitHub (these are the scripts at https://aka.ms/AzPolicyScripts).  For those risk averse folks (not a bad idea 😊), there is an option to source these yourself if you’d rather control the update of these scripts in source as they are updated.
+To test your pipeline browse to pipelines, locate your named pipeline (in my case AzureDiagnostics), click the three dots on the right and select Run pipeline. If you have multiple environments, you’ll see options to select between them as well as the option to get scripts from GitHub (these are the scripts at [https://aka.ms/AzPolicyScripts](https://aka.ms/AzPolicyScripts)).  For those risk averse folks (not a bad idea 😊), there is an option to source these yourself if you’d rather control the update of these scripts in source as they are updated.
  
 Next you can click on the job and monitor the steps as they execute
  
@@ -235,4 +239,3 @@ If you receive a message during the Deploy-ARMTemplateExport template phase of t
 ### Pushing to Main Branch (Git) Fails
 
 If you receive a message during the Push template to the main branch phase of the pipeline (see below) please refer to the section titled Service Connection Rights in Azure DevOps Git Repository of this how-to to ensure your Service Connection has the rights it needs to Git.
- 
