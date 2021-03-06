@@ -40,7 +40,7 @@ The pipeline example source file is located here: [https://github.com/jimgbritt/
 
 1. Create a new project in your Azure DevOps instance (I called mine AzureDiagnostics) and feel free to make this a private repo as it is not necessary to publish this publicly.
 
-    ![image.png](.\images\github-pipeline.png)
+    ![image.png](\images\github-pipeline.png)
 
 1. Provide a description.
 1. Set the configuration appropriate to your needs and select Create.
