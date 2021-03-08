@@ -2,7 +2,11 @@
 
 ## Azure Policies to Enable Azure Diagnostics
 
-## INTRODUCTION
+## Background
+
+This pipeline example is an artifact of our internal Azure Demo environment (**Contoso Hotels**) and a governance example we have provided to showcase Azure Governance (Azure Policy / Policy Initiative to support Azure Diagnostics applied to all PaaS resources (that support it) in our target scope that ensures all of our resources are enabled for Azure Diagnostics [as new resources get introduced], or new categories are introduced within an existing resourceType.  This is meant to put the scripts in https://aka.ms/AzPolicyScripts into action within a well governed environment.  This is **meant as an example and use at your own risk**.  Review the limitations below to ensure you are aware of the limits and capabilities of this example.)
+
+## Introduction
 
 Leverage this repository as an example to get started deploying Azure Diagnostics via Custom Azure Policies wrapped in a policy initiative ARM template.  This DevOps pipeline allows you to dynamically build the necessary custom Azure Policies to configure your PaaS resources in Azure that support Azure Diagnostics.  The pipeline can be run on a schedule (example: daily) to ensure that your resources are always configured with the latest Azure Diagnostic configurations and stay compliant.
 
@@ -12,17 +16,17 @@ Leverage this repository as an example to get started deploying Azure Diagnostic
 
 1. Creates the custom policies for each ResourceType and creates an ARM template Policy Initiative that can be leveraged to deploy directly to your Azure Subscription.
 
-1. As updates are made to ResourceTypes or on first execution 
+1. As updates are made to ResourceTypes or on first execution:
 
-    a. New resources that support Azure Diagnostics or new categories / metrics are enabled for a ResourceType.
+    a. New resources that support Azure Diagnostics or new categories / metrics are enabled for a ResourceType **via Azure Policy**.
 
-    b. A new ARM template is generated, compared against the baseline ARM template in your Git, promotes it to your new baseline (capturing changes in Git history)
+    b. **A new ARM template is generated**, **compared against the baseline ARM template in your Git**, **promotes** it to your new baseline (capturing changes in Git history)
 
-    c. Initiates a policy refresh against your subscription.
+    c. Initiates a **policy refresh** against your subscription.
 
-    d. Then remediates the Azure Policy Initiative to ensure all resourceTypes are configured for Azure Diagnostics.
+    d. Then **remediates** the Azure Policy Initiative to ensure all resourceTypes are configured for Azure Diagnostics.
 
-## CURRENT KNOWN LIMITATIONS & RESTRICTIONS
+## Current Known Limitations & Restrictions
 
 * The scripts (in their current release) and the pipeline that is leveraged to run them **do not support Subscription Level Diagnostic Logs** (ex: Activity Logs).
 
@@ -34,7 +38,7 @@ Leverage this repository as an example to get started deploying Azure Diagnostic
 
 * This is meant for **evaluation / pre-production** testing to validate that this will support your environment. **Test! Test! Test!**
 
-## IMPORTING PIPELINE FROM GITHUB TO AZURE DEVOPS
+## Importing Pipeline from GitHub to Azure DevOps
 
 The pipeline example source file is located here: [https://github.com/jimgbritt/AzureDiagnosticsPipeline](https://github.com/jimgbritt/AzureDiagnosticsPipeline)
 
@@ -65,13 +69,13 @@ The pipeline example source file is located here: [https://github.com/jimgbritt/
 
     ![image.png](./images/ado-import-successful.png)
 
-## CONFIGURATION OF PIPELINE
+## Configuration of Pipeline
 
 Once things are imported, there are a few configurations that need to be done to ensure this can work within your environment.
 
 ![image.png](./images/ado-diagnosticspipeline.png)
 
-## SERVICE CONNECTION CONFIGURATION (SPN)
+## Service Connection Configuration (SPN)
 
 You need to create a Service Connection to your Azure Subscription that has rights to connect to your environment, create an ARM template deployment, assign a policy initiative, initiate the policy compliance evaluation and finally policy initiative remediation.
 
@@ -82,7 +86,7 @@ You need to create a Service Connection to your Azure Subscription that has righ
 1. **Service Connections / Create service connection**.
 
     ![image.png](./images/ado-firstserviceconnection.png)
- 
+
 1. Type in **Azure** and select **Azure Resource Manager** from the connection type options.
 
     ![image.png](./images/ado-armconnection.png)
@@ -104,7 +108,7 @@ You need to create a Service Connection to your Azure Subscription that has righ
 
     ![image.png](./images/ado-serviceconnections.png)
 
-## IMPORTING PIPELINE FROM GIT SOURCE (LOCAL REPO)
+## Importing Pipeline from Git Source (Local Repo)
 
 The next step is to import your pipeline so that you can leverage it on demand or on a schedule as needed.
 
@@ -128,7 +132,7 @@ The next step is to import your pipeline so that you can leverage it on demand o
 
     ![image.png](./images/ado-selectpipeline.png)
 
-## MODIFICATIONS NEEDED TO PIPELINE SOURCE
+## Modifications Needed to Pipeline Source
 
 There are some modifications needed for this pipeline to work in your environment.
 
@@ -241,7 +245,7 @@ The environment specific variable file contains specific details that allow you 
 * **AzureSubscriptionEndpoint**: This is your Service Connection you created at the beginning to connect to Azure.
 * **Location**: Update this according to your target region preferred for your ARM deployment.
 
-## SETTING UP RIGHTS
+## Setting Up Rights
 
 Service Connection (SPN) Rights in Subscription Target
 You will initially need to setup rights for your SPN that you previously created in the Service Connection section of this how-to.  I have setup owner rights but you can certainly define according to least rights privilege.  This SPN needs to have enough rights to assign rights to the managed identity for your policy assignments, etc.
@@ -256,7 +260,7 @@ In order for your Service Connection to commit to your Git the necessary files (
 
 ![image.png](./images/ado-serviceconnectiongitrights.png)
 
-## DEPLOYMENT TESTING
+## Deployment Testing
 
 To test your pipeline browse to pipelines, locate your named pipeline (in my case AzureDiagnostics), click the three dots on the right and select **Run pipeline**. If you have multiple environments, you’ll see options to select between them as well as the option to get scripts from GitHub (these are the scripts at [https://aka.ms/AzPolicyScripts](https://aka.ms/AzPolicyScripts)).  For those risk averse folks (not a bad idea 😊), there is an option to source these yourself if you’d rather control the update of these scripts in source as they are updated.
 
@@ -270,7 +274,7 @@ The entire process generally takes about 15 mins max on the first run and if no 
 
 ![image.png](./images/ado-jobsdetails.png)
 
-## VALIDATION
+## Validation
 
 To validate that everything is working, you should see a Policy Initiative Assigned within the target subscription you have defined.
 
