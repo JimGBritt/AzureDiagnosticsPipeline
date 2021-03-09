@@ -2,6 +2,8 @@
 
 ## Azure Policies to Enable Azure Diagnostics
 
+![image.png](./images/PipelineScriptsOverview.png)
+
 ## Background
 
 This pipeline example is an artifact of our internal Azure Demo environment (**Contoso Hotels**) and a governance example we have provided to showcase Azure Governance (Azure Policy / Policy Initiative to support Azure Diagnostics applied to all PaaS resources (that support it) in our target scope that ensures all of our resources are enabled for Azure Diagnostics [as new resources get introduced], or new categories are introduced within an existing resourceType.  This is meant to put the scripts in https://aka.ms/AzPolicyScripts into action within a well governed environment.  This is **meant as an example and use at your own risk**.  Review the limitations below to ensure you are aware of the limits and capabilities of this example.)
