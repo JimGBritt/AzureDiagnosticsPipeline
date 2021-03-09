@@ -8,6 +8,8 @@
 
 This pipeline example is an artifact of our internal Azure Demo environment (**Contoso Hotels**) and a governance example we have provided to showcase Azure Governance (Azure Policy / Policy Initiative to support Azure Diagnostics applied to all PaaS resources (that support it) in our target scope that ensures all of our resources are enabled for Azure Diagnostics [as new resources get introduced], or new categories are introduced within an existing resourceType.  This is meant to put the scripts in https://aka.ms/AzPolicyScripts into action within a well governed environment.  This is **meant as an example and use at your own risk**.  Review the limitations below to ensure you are aware of the limits and capabilities of this example.)
 
+**Special Thanks** to Nikolay Sucheninov and the VIAcode team for working to get the scripts located at https://aka.ms/AzPolicyScripts integrated into this awesome pipeline example!
+
 ## Introduction
 
 Leverage this repository as an example to get started deploying Azure Diagnostics via Custom Azure Policies wrapped in a policy initiative ARM template.  This DevOps pipeline allows you to dynamically build the necessary custom Azure Policies to configure your PaaS resources in Azure that support Azure Diagnostics.  The pipeline can be run on a schedule (example: daily) to ensure that your resources are always configured with the latest Azure Diagnostic configurations and stay compliant.
