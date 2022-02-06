@@ -25,7 +25,7 @@ jobs:
 - job: DeployDiagnosticsInitiative${{ parameters.environment }}
   displayName: Deploy Diagnostics Policy Initiative to ${{ parameters.environment }}
   pool: 
-    name: Hosted VS2017
+    vmimage: 'windows-latest'
 
   variables:
   - template: diagnostic-policy.variables.yml
