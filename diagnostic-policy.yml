@@ -1,0 +1,171 @@
+trigger: none
+
+parameters:
+- name: environment
+  displayName: 'Environment to deploy'
+  type: string
+  default: Integration
+  values:
+  - Integration
+  - PreProd
+
+- name: fromGitHub
+  displayName: 'Get scripts from GitHub'
+  type: boolean
+  default: true
+
+
+variables:
+- ${{ if eq(parameters.environment, 'Integration') }}:
+  - template: diagnostic-policy-integration.variables.yml
+- ${{ if eq(parameters.environment, 'PreProd') }}:
+  - template: diagnostic-policy-preprod.variables.yml
+
+jobs:
+- job: DeployDiagnosticsInitiative${{ parameters.environment }}
+  displayName: Deploy Diagnostics Policy Initiative to ${{ parameters.environment }}
+  pool: 
+    vmimage: 'windows-latest'
+
+  variables:
+  - template: diagnostic-policy.variables.yml
+
+  steps:
+  - checkout: self
+    persistCredentials: true
+
+  - pwsh: |
+      cd $(Pipeline.Workspace)
+      git clone https://github.com/JimGBritt/AzurePolicy.git
+    displayName: Clone AzurePolicy from GitHub
+    condition: ${{ parameters.fromGitHub }}
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: $(Pipeline.Workspace)/AzurePolicy/AzureMonitor/Scripts
+      contents: '*.ps1'
+      targetFolder: $(ScriptPath)
+      overWrite: true
+    displayName: Copy scripts
+    condition: ${{ parameters.fromGitHub }}
+
+  - task: AzurePowerShell@4
+    displayName: 'Create $(TemplateFileName) template'
+    inputs:
+      azurePowerShellVersion: LatestVersion
+      azureSubscription: ${{variables.azureSubscriptionEndpoint}}
+      ScriptType: InlineScript
+      Inline: |
+        $context = Get-AzContext
+        Write-Host "##vso[task.setvariable variable=subscriptionId]$($context.Subscription.id)"
+
+        $(ScriptPath)/Create-AzDiagPolicy.ps1 -ExportDir '$(ExportDir)' -ExportAll -ExportLA -AllRegions -ValidateJSON -ExportInitiative `
+          -InitiativeDisplayName '$(InitiativeDisplayName)' -TemplateFileName '$(TemplateFileName)' `
+          -SubscriptionId $context.Subscription.id
+
+        $isChanged = !(Test-Path -Path '$(policyTemplatePath)/$(templateFileName).json') `
+          -or (Compare-Object -ReferenceObject $(Get-Content '$(policyTemplatePath)/$(templateFileName).json') -DifferenceObject $(Get-Content '$(exportDir)/$(templateFileName).json'))
+
+        if ($isChanged) {
+          if (!(Test-Path -Path '$(policyTemplatePath)')) { New-Item -ItemType Directory -Path '$(policyTemplatePath)' -Force }
+          Copy-Item -Path '$(exportDir)/$(templateFileName).json' -Destination '$(policyTemplatePath)/$(templateFileName).json'
+          Write-Host "##vso[task.setvariable variable=isChanged]$isChanged"
+        }
+
+  - task: AzurePowerShell@4
+    displayName: 'Deploy $(TemplateFileName) template'
+    condition: and(succeeded(), eq(variables.isChanged, true))
+    inputs:
+      azurePowerShellVersion: LatestVersion
+      azureSubscription: ${{variables.azureSubscriptionEndpoint}}
+      ScriptType: InlineScript
+      Inline: |
+        New-AzDeployment -Name 'Deploy_Diagnostics_Initiative_$(Build.BuildNumber)' -Location $(location) -TemplateFile '$(ExportDir)/$(TemplateFileName).json' -Verbose
+
+  - task: AzurePowerShell@4
+    displayName: 'Assign initiative'
+    condition: and(succeeded(), eq(variables.isChanged, true))
+    inputs:
+      azurePowerShellVersion: LatestVersion
+      azureSubscription: ${{variables.azureSubscriptionEndpoint}}
+      ScriptType: InlineScript
+      Inline: |
+        $template = Get-Content '$(ExportDir)/$(TemplateFileName).json' | ConvertFrom-Json
+        $initiative = $template.resources | ? { $_.properties.displayName -eq '$(InitiativeDisplayName)' }
+
+        Start-Sleep -Seconds 30
+
+        $policySetDefinition = Get-AzPolicySetDefinition -Name $initiative.name -SubscriptionId $(subscriptionId)
+        $logAnalyticsResource = Get-AzResource -Name $(logAnalyticsName) -ResourceType 'Microsoft.OperationalInsights/workspaces'
+
+        $templateParameters = @{
+          location = '$(location)'
+          displayName = '$(initiativeDisplayName)'
+          identityType = '$(policy.identityType)'
+          policyDefinitionId = $policySetDefinition.PolicySetDefinitionId
+          parameters = @{
+            profileName = @{
+              value = '$(policy.profileName)'
+            }
+            logAnalytics = @{
+              value = $logAnalyticsResource.ResourceId
+            }
+            metricsEnabled = @{
+              value = 'True'
+            }
+            logsEnabled = @{
+              value = 'True'
+            }
+          }
+        }
+
+        $policyAssignment = New-AzDeployment -Name 'Assign_Diagnostics_Initiative_$(Build.BuildNumber)' -Location $(location) `
+          -TemplateFile '$(armTemplatePath)/Microsoft.Authorization/policyAssignment.json' `
+          -TemplateParameterObject $templateParameters -Verbose
+
+        Write-Host "##vso[task.setvariable variable=policyAssignmentId]$($policyAssignment.Outputs.policyAssignmentId.value)"
+
+        Start-Sleep -Seconds 30
+
+        $templateParameters = @{
+          principalId = $policyAssignment.Outputs.principalId.value
+          roleDefinitionId = '$(contributorRoleDefinitionId)'
+        }
+
+        New-AzDeployment -Name 'Assign_Role_To_Initiative_$(Build.BuildNumber)' -Location $(location) `
+          -TemplateFile '$(armTemplatePath)/Microsoft.Authorization/roleAssignment.json' `
+          -TemplateParameterObject $templateParameters -Verbose
+
+  - task: AzurePowerShell@4
+    #enabled: false
+    displayName: 'Trigger Policy Evaluation'
+    condition: and(succeeded(), eq(variables.isChanged, true))
+    inputs:
+      azurePowerShellVersion: LatestVersion
+      azureSubscription:  ${{variables.azureSubscriptionEndpoint}}
+      ScriptType: InlineScript
+      Inline: |
+        $(ScriptPath)/Trigger-PolicyEvaluation.ps1 -SubscriptionId '$(subscriptionId)'
+
+  - task: AzurePowerShell@4
+    #enabled: false
+    displayName: 'Trigger Policy Remediation'
+    condition: and(succeeded(), eq(variables.isChanged, true))
+    inputs:
+      azurePowerShellVersion: LatestVersion
+      azureSubscription:  ${{variables.azureSubscriptionEndpoint}}
+      ScriptType: InlineScript
+      Inline: |
+        $(ScriptPath)/Trigger-PolicyInitiativeRemediation.ps1 -SubscriptionId '$(subscriptionId)' -PolicyAssignmentId '$(policyAssignmentId)' -Force
+
+  - task: CmdLine@2
+    displayName: 'Push template to the $(Build.SourceBranchName) branch'
+    condition: and(succeeded(), eq(variables.isChanged, true))
+    inputs:
+      script: |
+        git config --global user.email ""
+        git config --global user.name "AzureDiagnosticsPipeline"
+        git checkout $(Build.SourceBranchName)
+        git add --all
+        git commit -m "Update Diagnostics Policy Initiative ARM template"
+        git push
