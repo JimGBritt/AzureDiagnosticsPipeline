@@ -1,6 +1,19 @@
 # Azure DevOps (Example) Pipeline
 ## Azure Policies to Enable Azure Diagnostics
 ## INTRODUCTION
+
+**UPDATES!**</span> - February 05, 2022
+
+**diagnostic-policy.yml**
+
+*Minor update*
+Update to fix an issue due to deprecated Windows 2016 support in Azure DevOps.
+
+```json
+  pool: 
+    vmimage: 'windows-latest'
+```
+
 Leverage this repository as an example to get started deploying Azure Diagnostics via Custom Azure Policies wrapped in a policy initiative ARM template.  This DevOps pipeline allows you to dynamically build the necessary custom Azure Policies to configure your PaaS resources in Azure that support Azure Diagnostics.  The pipeline can be run on a schedule (example: daily) to ensure that your resources are always configured with the latest Azure Diagnostic configurations and stay compliant.
 
 1. Pipeline automatically pulls down the scripts from [https://aka.ms/AzPolicyScripts](https://aka.ms/AzPolicyScripts) with an optional parameter to not automatically update once initially downloaded
